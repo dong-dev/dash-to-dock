@@ -464,6 +464,12 @@ const DockSettings = GObject.registerClass({
             this._builder.get_object('intellihide_switch'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
+
+          this._settings.bind('always-hide',
+            this._builder.get_object('always_hide_switch'),
+            'active', Gio.SettingsBindFlags.DEFAULT);
+
+
         this._settings.bind('animation-time',
             this._builder.get_object('animation_duration_spinbutton'),
             'value',

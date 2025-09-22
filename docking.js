@@ -251,6 +251,8 @@ const DockedDash = GObject.registerClass({
         this._autohideIsEnabled = null;
         this._intellihideIsEnabled = null;
 
+        this._alwaysHideIsEnabled = settings.alwaysHide;
+
         // This variable marks if _disableUnredirect() is called
         // to help restore the original state when intelihide is disabled.
         this._unredirectDisabled = false;
@@ -627,6 +629,13 @@ const DockedDash = GObject.registerClass({
             },
         ], [
             settings,
+            'changed::always-hide',
+            () => {
+                this._updateVisibilityMode();
+                this._updateVisibleDesktop();
+            },
+        ], [
+            settings,
             'changed::intellihide-mode',
             () => {
                 this._intellihide.forceUpdate();
@@ -700,6 +709,11 @@ const DockedDash = GObject.registerClass({
      */
     _updateVisibilityMode() {
         const {settings} = DockManager;
+        this._alwaysHideIsEnabled = settings.alwaysHide;
+        if (this._alwaysHideIsEnabled) {
+            this._hide();
+            return;
+        }
         if (DockManager.settings.dockFixed || DockManager.settings.manualhide) {
             this._autohideIsEnabled = false;
             this._intellihideIsEnabled = false;
@@ -747,6 +761,9 @@ const DockedDash = GObject.registerClass({
         if (DockManager.settings.dockFixed) {
             this._removeAnimations();
             this._animateIn(settings.animationTime, 0);
+        } else if (this._alwaysHideIsEnabled) {
+            this._ignoreHover = true;
+            this._animateOut(settings.animationTime, 0);
         } else if (this._intellihideIsEnabled) {
             if (!this.dash.requiresVisibility && this._intellihide.getOverlapStatus()) {
                 this._ignoreHover = false;
@@ -776,6 +793,9 @@ const DockedDash = GObject.registerClass({
         this._ignoreHover = true;
         this._intellihide.disable();
         this._removeAnimations();
+        if (this._alwaysHideIsEnabled) {
+            return;
+        }
         this._animateIn(DockManager.settings.animationTime, 0);
     }
 
@@ -848,6 +868,9 @@ const DockedDash = GObject.registerClass({
     }
 
     _animateIn(time, delay) {
+        if (this._alwaysHideIsEnabled) {
+            return;
+        }
         if (this._intellihideIsEnabled)
             this._disableUnredirect();
         this._dockState = State.SHOWING;
@@ -1230,6 +1253,9 @@ const DockedDash = GObject.registerClass({
     }
 
     _updateVisibleDesktop() {
+        if(this._alwaysHideIsEnabled) {
+            return;
+        }
         if (!this._intellihideIsEnabled)
             return;
 
@@ -1912,6 +1938,9 @@ export class DockManager {
     }
 
     _toggle() {
+        if (this._alwaysHideIsEnabled) {
+            return;
+        }
         if (this._toggleLater)
             return;
 
@@ -2032,6 +2061,9 @@ export class DockManager {
     }
 
     _createDocks() {
+        if (this._alwaysHideIsEnabled) {
+            return;
+        }
         // If there are no monitors (headless configurations, but it can also
         // happen temporary while disconnecting and reconnecting monitors), just
         // do nothing. When a monitor will be connected we we'll be notified and

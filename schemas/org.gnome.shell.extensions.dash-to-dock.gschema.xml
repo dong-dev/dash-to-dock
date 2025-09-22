@@ -131,6 +131,11 @@
       <summary>Dock dodges windows</summary>
       <description>Enable or disable intellihide mode</description>
     </key>
+     <key type="b" name="always-hide">
+      <default>true</default>
+      <summary>Never show the dock</summary>
+      <description>Enable or disable intellihide mode</description>
+    </key>
     <key name="intellihide-mode" enum="org.gnome.shell.extensions.dash-to-dock.intellihide-mode">
       <default>'FOCUS_APPLICATION_WINDOWS'</default>
       <summary>Define which windows are considered for intellihide.</summary>
